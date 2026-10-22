@@ -1,0 +1,49 @@
+# Segredos e credenciais (NUNCA commitar)
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.cert
+secrets.json
+tokens.json
+config_local.*
+
+# Banco de dados e dados em runtime
+*.db
+*.sqlite
+*.sqlite3
+monitoramento.db
+
+# Logs
+*.log
+servidor.log
+logs/
+
+# Capturas de trafego (contem tokens e dados reais em texto puro)
+*.pcap
+*.pcapng
+seguranca/capturas/
+
+# Dados de experimentos brutos (opcional: manter apenas CSVs tratados)
+experimentos/saidas/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Editores e sistema operacional
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build / distribuicao
+dist/
+build/
