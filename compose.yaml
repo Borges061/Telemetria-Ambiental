@@ -3,6 +3,8 @@ name: projeto-monitoramento
 
 services:
 
+
+  #Anderson
   servidor:
     build:
       context: ./servidor
@@ -36,6 +38,7 @@ services:
     networks:
       - monitoramento-net
 
+  #Pedro
   sensor-ws-01:
     build:
       context: ./sensores
@@ -61,7 +64,8 @@ services:
 
     networks:
       - monitoramento-net
-
+  
+  #Pedro
   sensor-ws-02:
     build:
       context: ./sensores
@@ -88,6 +92,7 @@ services:
     networks:
       - monitoramento-net
 
+  #Pedro
   sensor-udp-01:
     build:
       context: ./sensores
@@ -115,6 +120,7 @@ services:
     networks:
       - monitoramento-net
 
+  #Pedro
   painel:
     image: nginx:alpine
 
@@ -135,6 +141,7 @@ services:
     networks:
       - monitoramento-net
 
+  #Luis
   experimentos:
     build:
       context: ./experimentos
