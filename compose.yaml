@@ -1,0 +1,179 @@
+
+name: projeto-monitoramento
+
+services:
+
+
+  #Anderson
+  servidor:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+
+    container_name: monitoramento-servidor
+
+    command:
+      - uvicorn
+      - main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+    environment:
+      DATABASE_PATH: /app/data/monitoramento.db
+      UDP_HOST: 0.0.0.0
+      UDP_PORT: "9999"
+      PYTHONUNBUFFERED: "1"
+
+    ports:
+      - "127.0.0.1:8000:8000/tcp"
+      - "127.0.0.1:9999:9999/udp"
+
+    volumes:
+      - sqlite_data:/app/data
+
+    restart: unless-stopped
+
+    networks:
+      - monitoramento-net
+
+  #Pedro
+  sensor-ws-01:
+    build:
+      context: ./sensores
+      dockerfile: Dockerfile
+
+    command:
+      - python
+      - sensor_ws.py
+      - --device-id
+      - sensor-ws-01
+      - --interval
+      - "2"
+
+    environment:
+      API_BASE_URL: http://servidor:8000
+      WS_URL: ws://servidor:8000/ws/sensor
+      PYTHONUNBUFFERED: "1"
+
+    depends_on:
+      - servidor
+
+    restart: unless-stopped
+
+    networks:
+      - monitoramento-net
+  
+  #Pedro
+  sensor-ws-02:
+    build:
+      context: ./sensores
+      dockerfile: Dockerfile
+
+    command:
+      - python
+      - sensor_ws.py
+      - --device-id
+      - sensor-ws-02
+      - --interval
+      - "2"
+
+    environment:
+      API_BASE_URL: http://servidor:8000
+      WS_URL: ws://servidor:8000/ws/sensor
+      PYTHONUNBUFFERED: "1"
+
+    depends_on:
+      - servidor
+
+    restart: unless-stopped
+
+    networks:
+      - monitoramento-net
+
+  #Pedro
+  sensor-udp-01:
+    build:
+      context: ./sensores
+      dockerfile: Dockerfile
+
+    command:
+      - python
+      - sensor_udp.py
+      - --device-id
+      - sensor-udp-01
+      - --interval
+      - "2"
+
+    environment:
+      API_BASE_URL: http://servidor:8000
+      UDP_HOST: servidor
+      UDP_PORT: "9999"
+      PYTHONUNBUFFERED: "1"
+
+    depends_on:
+      - servidor
+
+    restart: unless-stopped
+
+    networks:
+      - monitoramento-net
+
+  #Pedro
+  painel:
+    image: nginx:alpine
+
+    container_name: monitoramento-painel
+
+    ports:
+      - "127.0.0.1:8080:80/tcp"
+
+    volumes:
+      - ./painel:/usr/share/nginx/html:ro
+      - ./painel/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      - servidor
+
+    restart: unless-stopped
+
+    networks:
+      - monitoramento-net
+
+  #Luis
+  experimentos:
+    build:
+      context: ./experimentos
+      dockerfile: Dockerfile
+
+    profiles:
+      - lab
+
+    working_dir: /app
+
+    volumes:
+      - ./experimentos:/app
+      - ./experimentos/resultados:/app/resultados
+
+    environment:
+      API_BASE_URL: http://servidor:8000
+      WS_URL: ws://servidor:8000/ws/sensor
+      UDP_HOST: servidor
+      UDP_PORT: "9999"
+      PYTHONUNBUFFERED: "1"
+
+    command: ["sleep", "infinity"]
+
+    depends_on:
+      - servidor
+
+    networks:
+      - monitoramento-net
+
+networks:
+  monitoramento-net:
+    driver: bridge
+
+volumes:
+  sqlite_data:
