@@ -1,3 +1,12 @@
+"""
+persistência de dados do servidor.
+
+gerencia a conexão com o banco SQLite,
+cria as tabelas necessárias e realiza operações de
+inserção e consulta dos dispositivos, leituras, alertas
+e limiares de monitoramento.
+"""
+
 
 import sqlite3
 from pathlib import Path

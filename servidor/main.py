@@ -1,3 +1,9 @@
+"""
+Responsável por inicializar a aplicação FastAPI e disponibilizar
+as rotas HTTP e WebSocket utilizadas pelo sistema.
+
+"""
+
 
 from datetime import datetime, timezone
 from fastapi import FastAPI
@@ -10,6 +16,7 @@ from servidor.auth import autenticar_dispositivo
 from servidor.db import salvar_leitura
 from servidor.protocolo import MensagemLeitura
 from servidor.conexoes import gerenciador
+# Instância principal da aplicação FastAPI.
 
 app = FastAPI()
 
@@ -45,6 +52,7 @@ async def websocket_painel(websocket: WebSocket):
 
     try:
         while True:
+            # Mantém a conexão aberta aguardando mensagens.
             await websocket.receive_text()
     except WebSocketDisconnect:
         pass
