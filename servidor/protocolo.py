@@ -30,7 +30,7 @@ class MensagemLeitura(BaseModel):
     timestamp: datetime
     #informações de grandeza monitorada
     metrica: str = Field(min_length=1)
-    valor: float
+    valor: float = Field(allow_inf_nan=False)
     unidade: str = Field(min_length=1)
     seq: int = Field(ge=0)
 

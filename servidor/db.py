@@ -63,6 +63,22 @@ def inicializar_banco():
             );
         """)
 
+        # Cadastra os limites padrão somente se ainda não existirem.
+        limiares_padrao = [
+            ("temperatura", 35.0, 15.0, "critico"),
+            ("umidade", 80.0, 30.0, "critico"),
+            ("qualidade_ar", 100.0, None, "critico")
+        ]
+
+        conexao.executemany(
+            """
+            INSERT OR IGNORE INTO limiares
+            (metrica, valor_max, valor_min, nivel)
+            VALUES (?, ?, ?, ?)
+            """,
+            limiares_padrao
+        )
+
 def salvar_leitura(device_id, metrica, valor, unidade, timestamp, seq):
     with conectar() as conexao:
         cursor = conexao.execute(
