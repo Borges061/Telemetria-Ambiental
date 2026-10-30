@@ -168,9 +168,8 @@ def verificar_status():
     uptime = (agora - inicio_servidor).total_seconds()
 
     return {
-        "status": "online",
-        "uptime_segundos": round(uptime, 2),
-        "clientes_conectados": gerenciador.total_conectados()
+        "uptime_s": round(uptime, 2),
+        "paineis": len(gerenciador.paineis)
     }
 
 @app.get("/api/alertas")
