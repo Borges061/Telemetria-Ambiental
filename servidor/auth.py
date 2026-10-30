@@ -12,41 +12,27 @@ com o servidor.
 import secrets
 import uuid
 from datetime import datetime, timezone
+import db
 
-from servidor.db import conectar
 
-
-def cadastrar_dispositivo(nome):    
+def cadastrar_dispositivo(nome):
     device_id = f"sensor-{uuid.uuid4().hex[:8]}"
-    #gera um token aleatorio para autenticar o dispositivo
     token = secrets.token_hex(16)
     criado_em = datetime.now(timezone.utc).isoformat()
 
-    with conectar() as conexao:
-        conexao.execute(
-            """
-            INSERT INTO dispositivos
-            (device_id, token, nome, criado_em)
-            VALUES (?, ?, ?, ?)
-            """,
-            (device_id, token, nome, criado_em)
-        )
+    db.criar_dispositivo(device_id, token, nome, criado_em)
 
     return {
         "device_id": device_id,
-        "token": token
+        "token": token,
+        "nome": nome
     }
 
 
 def autenticar_dispositivo(device_id, token):
-    with conectar() as conexao:
-        dispositivo = conexao.execute(
-            """
-            SELECT device_id
-            FROM dispositivos
-            WHERE device_id = ? AND token = ?
-            """,
-            (device_id, token)
-        ).fetchone()
+    dispositivo = db.buscar_dispositivo(device_id)
 
-    return dispositivo is not None
+    if dispositivo is None:
+        return False
+
+    return secrets.compare_digest(dispositivo["token"], token)

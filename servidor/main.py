@@ -6,16 +6,14 @@ as rotas HTTP e WebSocket utilizadas pelo sistema.
 
 
 from datetime import datetime, timezone
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from servidor.auth import cadastrar_dispositivo
-from fastapi import WebSocket, WebSocketDisconnect
-from pydantic import ValidationError
 
-from servidor.auth import autenticar_dispositivo
-from servidor.db import salvar_leitura
-from servidor.protocolo import MensagemLeitura
-from servidor.conexoes import gerenciador
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
+from auth import cadastrar_dispositivo, autenticar_dispositivo
+from db import salvar_leitura
+from protocolo import validar_leitura, msg_update, msg_erro
+from conexoes import gerenciador
 # Instância principal da aplicação FastAPI.
 
 app = FastAPI()
@@ -27,6 +25,39 @@ clientes_conectados = 0
 class CadastroDispositivo(BaseModel):
     nome: str = Field(min_length=1)
 
+async def processar_leitura(raw, origem):
+    """
+    Processa uma leitura recebida por WebSocket ou UDP.
+
+    Retorna None em caso de sucesso.
+    Retorna um dicionário de erro se a leitura for rejeitada.
+    """
+
+    leitura, erro = validar_leitura(raw)
+
+    if erro is not None:
+        return erro
+
+    if not autenticar_dispositivo(leitura.device_id, leitura.token):
+        return {
+            "codigo": "TOKEN_INVALIDO",
+            "mensagem": "Dispositivo não autenticado"
+        }
+
+    salvar_leitura(
+        leitura.device_id,
+        leitura.metrica,
+        leitura.valor,
+        leitura.unidade,
+        leitura.timestamp.isoformat(),
+        leitura.seq
+    )
+
+    atualizacao = msg_update(leitura)
+
+    await gerenciador.transmitir_paineis(atualizacao)
+
+    return None
 
 @app.get("/api/status")
 def verificar_status():
@@ -66,50 +97,31 @@ async def websocket_sensor(websocket: WebSocket):
 
     try:
         while True:
-            dados = await websocket.receive_json()
-
             try:
-                leitura = MensagemLeitura.model_validate(dados)
-            except ValidationError:
-                await websocket.send_json({
-                    "tipo": "erro",
-                    "codigo": "FORMATO_INVALIDO",
-                    "mensagem": "Mensagem JSON inválida",
-                    "seq": dados.get("seq") if isinstance(dados, dict) else None
-                })
+                dados = await websocket.receive_json()
+            except WebSocketDisconnect:
+                raise
+            except ValueError:
+                await websocket.send_json(
+                    msg_erro(
+                        "FORMATO_INVALIDO",
+                        "Mensagem JSON inválida"
+                    )
+                )
                 continue
 
-            if not autenticar_dispositivo(
-                leitura.device_id,
-                leitura.token
-            ):
-                await websocket.send_json({
-                    "tipo": "erro",
-                    "codigo": "TOKEN_INVALIDO",
-                    "mensagem": "Dispositivo não autenticado",
-                    "seq": leitura.seq
-                })
-                continue
+            erro = await processar_leitura(dados, "websocket")
 
-            salvar_leitura(
-                leitura.device_id,
-                leitura.metrica,
-                leitura.valor,
-                leitura.unidade,
-                leitura.timestamp.isoformat(),
-                leitura.seq
-            )
+            if erro is not None:
+                seq = dados.get("seq") if isinstance(dados, dict) else None
 
-            atualizacao = {
-                "tipo": "update",
-                "device_id": leitura.device_id,
-                "metrica": leitura.metrica,
-                "valor": leitura.valor,
-                "unidade": leitura.unidade,
-                "timestamp": leitura.timestamp.isoformat()
-            }
-
-            await gerenciador.transmitir_paineis(atualizacao)
+                await websocket.send_json(
+                    msg_erro(
+                        erro["codigo"],
+                        erro["mensagem"],
+                        seq
+                    )
+                )
 
     except WebSocketDisconnect:
         pass

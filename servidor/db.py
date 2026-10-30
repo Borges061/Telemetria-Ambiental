@@ -8,11 +8,16 @@ e limiares de monitoramento.
 """
 
 
+import os
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "monitoramento.db"
-
+DB_PATH = Path(
+    os.getenv(
+        "DATABASE_PATH",
+        str(Path(__file__).resolve().parent.parent / "monitoramento.db")
+    )
+)
 
 def conectar():
     conexao = sqlite3.connect(DB_PATH)
@@ -137,3 +142,32 @@ def get_limiar(metrica):
 
         return dict(registro) if registro else None
 
+def init_db():
+    """Inicializa as tabelas do banco de dados."""
+    inicializar_banco()
+
+def criar_dispositivo(device_id, token, nome, criado_em):
+    """Salva um novo dispositivo no banco de dados."""
+    with conectar() as conexao:
+        conexao.execute(
+            """
+            INSERT INTO dispositivos
+            (device_id, token, nome, criado_em)
+            VALUES (?, ?, ?, ?)
+            """,
+            (device_id, token, nome, criado_em)
+        )
+
+def buscar_dispositivo(device_id):
+    """Busca um dispositivo pelo seu identificador."""
+    with conectar() as conexao:
+        registro = conexao.execute(
+            """
+            SELECT device_id, token, nome, criado_em
+            FROM dispositivos
+            WHERE device_id = ?
+            """,
+            (device_id,)
+        ).fetchone()
+
+        return dict(registro) if registro else None
