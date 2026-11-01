@@ -5,6 +5,7 @@ as rotas HTTP e WebSocket utilizadas pelo sistema.
 """
 
 
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -18,7 +19,16 @@ from servidor.protocolo import MensagemLeitura
 from servidor.conexoes import gerenciador
 # Instância principal da aplicação FastAPI.
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    from servidor.db import inicializar_banco
+
+    inicializar_banco()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 inicio_servidor = datetime.now(timezone.utc)
 clientes_conectados = 0
