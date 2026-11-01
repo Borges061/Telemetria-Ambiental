@@ -9,12 +9,19 @@ e limiares de monitoramento.
 
 
 import sqlite3
+import os
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "monitoramento.db"
+DB_PATH = Path(
+    os.getenv(
+        "DATABASE_PATH",
+        str(Path(__file__).resolve().parent.parent / "monitoramento.db")
+    )
+)
 
 
 def conectar():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conexao = sqlite3.connect(DB_PATH)
     conexao.row_factory = sqlite3.Row
     return conexao
@@ -136,4 +143,3 @@ def get_limiar(metrica):
         ).fetchone()
 
         return dict(registro) if registro else None
-
