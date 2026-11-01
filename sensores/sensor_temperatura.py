@@ -25,19 +25,33 @@ class SensorSimulado:
         if random.random() < 0.03:
             temperatura += 12
 
-        return {
+        '''return {
             "device_id": self.device_id,
             "seq": self.seq,
             "timestamp": datetime.now(
                 timezone.utc
             ).isoformat(),
             "temperatura": round(temperatura, 2)
-        }
+        }'''
 
+        return {
+                    "tipo": "leitura",
+                    "device_id": self.device_id,
+                    "token": "16221a10743621550b3f7445f5bc471e",
+                    "timestamp": datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+                    "metrica": "temperatura",
+                    "valor": round(temperatura, 2),
+                    "unidade": "ºC",
+                    "seq": self.seq
+                }
+    
 
-#sensor = SensorSimulado("sensor_001")
+#Para Teste
+'''sensor = SensorSimulado("sensor-4ff600df")
 
-#while True:
-#    leitura = sensor.gerar_leitura()
-#    print(leitura)
-#    time.sleep(2)
+while True:
+    leitura = sensor.gerar_leitura()
+    print(leitura)
+    time.sleep(2)'''
