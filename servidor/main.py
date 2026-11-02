@@ -172,6 +172,13 @@ def verificar_status():
         "paineis": len(gerenciador.paineis)
     }
 
+@app.get("/api/ping")
+def verificar_ping():
+    return {
+        "pong": True,
+        "t_servidor": datetime.now(timezone.utc).isoformat()
+    }
+
 @app.get("/api/alertas")
 def consultar_alertas():
     """
