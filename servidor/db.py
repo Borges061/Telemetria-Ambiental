@@ -8,6 +8,7 @@ e limiares de monitoramento.
 """
 
 
+import os
 import sqlite3
 import os
 from pathlib import Path
@@ -64,6 +65,22 @@ def inicializar_banco():
                 nivel TEXT
             );
         """)
+
+        # Cadastra os limites padrão somente se ainda não existirem.
+        limiares_padrao = [
+            ("temperatura", 35.0, 15.0, "critico"),
+            ("umidade", 80.0, 30.0, "critico"),
+            ("qualidade_ar", 100.0, None, "critico")
+        ]
+
+        conexao.executemany(
+            """
+            INSERT OR IGNORE INTO limiares
+            (metrica, valor_max, valor_min, nivel)
+            VALUES (?, ?, ?, ?)
+            """,
+            limiares_padrao
+        )
 
 def salvar_leitura(device_id, metrica, valor, unidade, timestamp, seq):
     with conectar() as conexao:
@@ -140,6 +157,36 @@ def get_limiar(metrica):
         registro = conexao.execute(
             "SELECT * FROM limiares WHERE metrica = ?",
             (metrica,)
+        ).fetchone()
+
+        return dict(registro) if registro else None
+
+def init_db():
+    """Inicializa as tabelas do banco de dados."""
+    inicializar_banco()
+
+def criar_dispositivo(device_id, token, nome, criado_em):
+    """Salva um novo dispositivo no banco de dados."""
+    with conectar() as conexao:
+        conexao.execute(
+            """
+            INSERT INTO dispositivos
+            (device_id, token, nome, criado_em)
+            VALUES (?, ?, ?, ?)
+            """,
+            (device_id, token, nome, criado_em)
+        )
+
+def buscar_dispositivo(device_id):
+    """Busca um dispositivo pelo seu identificador."""
+    with conectar() as conexao:
+        registro = conexao.execute(
+            """
+            SELECT device_id, token, nome, criado_em
+            FROM dispositivos
+            WHERE device_id = ?
+            """,
+            (device_id,)
         ).fetchone()
 
         return dict(registro) if registro else None

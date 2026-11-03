@@ -52,7 +52,7 @@
             <span class="eyebrow">SENSORES CONECTADOS</span>
           </div>
           <strong class="metric-value" id="active-connections">—</strong>
-          <span class="card-caption">Conectados ao servidor</span>
+          <span class="card-caption">WebSocket ativo ou leitura UDP nos últimos 10 s</span>
         </article>
         <article class="summary-card">
           <div class="card-heading">
@@ -122,6 +122,34 @@
             </table>
           </div>
         </article>
+      </section>
+
+      <section class="panel alerts-panel" aria-labelledby="alerts-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">EVENTOS</p>
+            <h2 id="alerts-title">Alertas de temperatura e umidade</h2>
+          </div>
+          <span class="alert-badge" id="alerts-count" aria-live="polite">0 alertas</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Sensor / métrica</th>
+                <th scope="col">Leitura</th>
+                <th scope="col">Limite violado</th>
+                <th scope="col">Nível</th>
+                <th scope="col">Horário</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-list" aria-live="polite">
+              <tr class="empty-row">
+                <td colspan="5">Nenhum alerta de temperatura ou umidade.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <footer>

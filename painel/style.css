@@ -348,6 +348,26 @@ select:focus-visible {
   box-shadow: 0 0 8px rgb(112 215 164 / 55%);
 }
 
+.alerts-panel {
+  margin-top: 16px;
+}
+
+.alert-badge {
+  padding: 6px 9px;
+  border: 1px solid rgb(255 123 120 / 25%);
+  border-radius: 20px;
+  background: rgb(255 123 120 / 8%);
+  color: #ffaaa7;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.alert-row td:nth-child(2),
+.alert-row td:nth-child(3),
+.alert-row td:nth-child(4) {
+  color: #ffaaa7;
+}
+
 .table-wrap {
   overflow-x: auto;
   margin-top: 19px;

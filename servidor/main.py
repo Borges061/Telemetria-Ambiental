@@ -3,30 +3,34 @@ Responsável por inicializar a aplicação FastAPI e disponibilizar
 as rotas HTTP e WebSocket utilizadas pelo sistema.
 
 """
-
-
 import asyncio
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from fastapi import FastAPI, Query
-from pydantic import BaseModel, Field
-from servidor.auth import cadastrar_dispositivo
-from fastapi import WebSocket, WebSocketDisconnect
-from pydantic import ValidationError
+from typing import Literal
 
-from servidor.auth import autenticar_dispositivo
-from servidor.db import listar_leituras, salvar_leitura
-from servidor.protocolo import MensagemLeitura
+from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field, model_validator
+
+from servidor.auth import autenticar_dispositivo, cadastrar_dispositivo
 from servidor.conexoes import gerenciador
+from servidor.db import (
+    get_limiar,
+    inicializar_banco,
+    listar_alertas,
+    listar_leituras,
+    salvar_alerta,
+    salvar_leitura,
+    set_limiar,
+)
+from servidor.log_config import configurar_logs
+from servidor.protocolo import msg_alerta, msg_erro, msg_update, validar_leitura
 from servidor.udp_server import iniciar_udp
-# Instância principal da aplicação FastAPI.
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    from servidor.db import inicializar_banco
-
+    configurar_logs()
     inicializar_banco()
     parar_udp = iniciar_udp(processar_leitura_udp, asyncio.get_running_loop())
     try:
@@ -44,26 +48,78 @@ class CadastroDispositivo(BaseModel):
     nome: str = Field(min_length=1)
 
 
-async def processar_leitura(dados: object) -> dict[str, object] | None:
-    try:
-        leitura = MensagemLeitura.model_validate(dados)
-    except ValidationError:
-        return {
-            "tipo": "erro",
-            "codigo": "FORMATO_INVALIDO",
-            "mensagem": "Mensagem JSON inválida",
-            "seq": dados.get("seq") if isinstance(dados, dict) else None
-        }
+class ConfiguracaoLimiar(BaseModel):
+    metrica: Literal["temperatura", "umidade", "qualidade_ar"]
+    valor_max: float | None = Field(default=None, allow_inf_nan=False)
+    valor_min: float | None = Field(default=None, allow_inf_nan=False)
+    nivel: Literal["critico"] = "critico"
+
+    @model_validator(mode="after")
+    def validar_limites(self):
+        if self.valor_max is None and self.valor_min is None:
+            raise ValueError(
+                "Informe pelo menos um limite mínimo ou máximo."
+            )
+
+        if (
+            self.valor_max is not None
+            and self.valor_min is not None
+            and self.valor_min >= self.valor_max
+        ):
+            raise ValueError(
+                "O limite mínimo deve ser menor que o máximo."
+            )
+
+        return self
+
+
+def verificar_limiar(metrica, valor):
+    """
+    Verifica se uma leitura ultrapassou os limites configurados.
+
+    Retorna o limite violado ou None se o valor estiver normal.
+    """
+
+    limiar = get_limiar(metrica)
+
+    if limiar is None:
+        return None
+
+    valor_max = limiar["valor_max"]
+    valor_min = limiar["valor_min"]
+
+    if valor_max is not None and valor > valor_max:
+        return valor_max
+
+    if valor_min is not None and valor < valor_min:
+        return valor_min
+
+    return None
+
+
+async def processar_leitura(
+    raw: object,
+    origem: str
+) -> dict[str, str] | None:
+    """
+    Processa uma leitura recebida por WebSocket ou UDP.
+
+    Retorna None em caso de sucesso.
+    Retorna um dicionário de erro se a leitura for rejeitada.
+    """
+
+    leitura, erro = validar_leitura(raw)
+
+    if erro is not None:
+        return erro
 
     if not autenticar_dispositivo(leitura.device_id, leitura.token):
         return {
-            "tipo": "erro",
             "codigo": "TOKEN_INVALIDO",
-            "mensagem": "Dispositivo não autenticado",
-            "seq": leitura.seq
+            "mensagem": "Dispositivo não autenticado"
         }
 
-    leitura_id = salvar_leitura(
+    salvar_leitura(
         leitura.device_id,
         leitura.metrica,
         leitura.valor,
@@ -72,17 +128,37 @@ async def processar_leitura(dados: object) -> dict[str, object] | None:
         leitura.seq
     )
 
-    atualizacao = {
-        "tipo": "update",
-        "id": leitura_id,
-        "device_id": leitura.device_id,
-        "metrica": leitura.metrica,
-        "valor": leitura.valor,
-        "unidade": leitura.unidade,
-        "timestamp": leitura.timestamp.isoformat()
-    }
+    atualizacao = msg_update(leitura)
 
     await gerenciador.transmitir_paineis(atualizacao)
+
+    # Verifica se a leitura ultrapassou algum limite.
+    limite_violado = verificar_limiar(leitura.metrica, leitura.valor)
+
+    if limite_violado is not None:
+        configuracao = get_limiar(leitura.metrica)
+        nivel = configuracao["nivel"]
+
+        # Registra o alerta no banco de dados.
+        salvar_alerta(
+            leitura.device_id,
+            leitura.metrica,
+            leitura.valor,
+            limite_violado,
+            nivel,
+            leitura.timestamp.isoformat()
+        )
+
+        # Monta a mensagem de alerta para o painel.
+        alerta = msg_alerta(
+            leitura,
+            limite_violado,
+            nivel
+        )
+
+        # Envia o alerta aos painéis conectados.
+        await gerenciador.transmitir_paineis(alerta)
+
     return None
 
 
@@ -90,7 +166,7 @@ async def processar_leitura_udp(
     dados: object,
     origem: str
 ) -> None:
-    erro = await processar_leitura(dados)
+    erro = await processar_leitura(dados, origem)
     if erro is not None:
         logging.warning(
             "UDP: leitura rejeitada de %s: %s",
@@ -110,21 +186,48 @@ def verificar_status():
         "sensores_conectados": gerenciador.total_sensores_conectados()
     }
 
+@app.get("/api/ping")
+def verificar_ping():
+    return {
+        "pong": True,
+        "t_servidor": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.get("/api/alertas")
+def consultar_alertas():
+    """
+    Retorna os alertas registrados no banco de dados.
+    """
+    return listar_alertas()
 
 @app.get("/api/leituras")
 def obter_leituras(
     device_id: str | None = Query(default=None, min_length=1),
+    device: str | None = Query(default=None, min_length=1),
     metrica: str | None = Query(default=None, min_length=1),
-    limite: int = Query(default=50, ge=1, le=500),
+    limite: int = Query(default=100, ge=1, le=1000),
 ):
-    return listar_leituras(device=device_id, metrica=metrica, limite=limite)
+    return listar_leituras(
+        device=device_id or device,
+        metrica=metrica,
+        limite=limite
+    )
 
 
 @app.post("/api/dispositivos", status_code=201)
 def registrar_dispositivo(dados: CadastroDispositivo):
     return cadastrar_dispositivo(dados.nome)
 
+@app.put("/api/limiares")
+def atualizar_limiar(dados: ConfiguracaoLimiar):
+    set_limiar(
+        dados.metrica,
+        dados.valor_max,
+        dados.valor_min,
+        dados.nivel
+    )
 
+    return get_limiar(dados.metrica)
 
 @app.websocket("/ws/painel")
 async def websocket_painel(websocket: WebSocket):
@@ -146,10 +249,31 @@ async def websocket_sensor(websocket: WebSocket):
 
     try:
         while True:
-            dados = await websocket.receive_json()
-            erro = await processar_leitura(dados)
+            try:
+                dados = await websocket.receive_json()
+            except WebSocketDisconnect:
+                raise
+            except ValueError:
+                await websocket.send_json(
+                    msg_erro(
+                        "FORMATO_INVALIDO",
+                        "Mensagem JSON inválida"
+                    )
+                )
+                continue
+
+            erro = await processar_leitura(dados, "websocket")
+
             if erro is not None:
-                await websocket.send_json(erro)
+                seq = dados.get("seq") if isinstance(dados, dict) else None
+
+                await websocket.send_json(
+                    msg_erro(
+                        erro["codigo"],
+                        erro["mensagem"],
+                        seq
+                    )
+                )
 
     except WebSocketDisconnect:
         pass

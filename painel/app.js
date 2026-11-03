@@ -4,7 +4,9 @@
   const WS_PROTOCOL = window.location.protocol === "https:" ? "wss:" : "ws:";
   const MAX_READINGS = 50;
   const MAX_TABLE_ROWS = 8;
+  const MAX_ALERT_ROWS = 10;
   const readings = [];
+  const alerts = [];
   const pendingLiveReadings = [];
   const knownMetrics = new Set();
   const knownDevices = new Set();
@@ -22,6 +24,8 @@
     metricFilter: document.getElementById("metric-filter"),
     deviceFilter: document.getElementById("device-filter"),
     readingsList: document.getElementById("readings-list"),
+    alertsList: document.getElementById("alerts-list"),
+    alertsCount: document.getElementById("alerts-count"),
     chartCanvas: document.getElementById("readings-chart"),
     chartEmpty: document.getElementById("chart-empty"),
     apiAddress: document.getElementById("api-address"),
@@ -197,6 +201,11 @@
   }
 
   function handleReading(message) {
+    if (message.tipo === "alerta") {
+      handleAlert(message);
+      return;
+    }
+
     if (
       message.tipo !== "update"
       || typeof message.device_id !== "string"
@@ -225,6 +234,94 @@
     }
 
     appendReading(reading);
+  }
+
+  function alertKey(alert) {
+    return [
+      alert.device_id,
+      alert.metrica,
+      alert.valor,
+      alert.limiar,
+      alert.nivel,
+      alert.timestamp,
+    ].join("|");
+  }
+
+  function handleAlert(message) {
+    if (
+      !["temperatura", "umidade"].includes(message.metrica)
+      || typeof message.device_id !== "string"
+      || typeof message.valor !== "number"
+      || typeof message.limiar !== "number"
+    ) {
+      console.warn("Alerta recebido em formato inesperado:", message);
+      return;
+    }
+
+    const alert = {
+      device_id: message.device_id,
+      metrica: message.metrica,
+      valor: message.valor,
+      limiar: message.limiar,
+      nivel: typeof message.nivel === "string" ? message.nivel : "alerta",
+      timestamp: message.timestamp || new Date().toISOString(),
+    };
+
+    if (alerts.some((item) => alertKey(item) === alertKey(alert))) return;
+    alerts.push(alert);
+    alerts.sort((first, second) => new Date(second.timestamp) - new Date(first.timestamp));
+    renderAlerts();
+  }
+
+  function renderAlerts(message = "Nenhum alerta de temperatura ou umidade.") {
+    const rows = alerts.slice(0, MAX_ALERT_ROWS);
+    elements.alertsList.replaceChildren();
+    elements.alertsCount.textContent = `${alerts.length} ${alerts.length === 1 ? "alerta" : "alertas"}`;
+
+    if (rows.length === 0) {
+      const row = document.createElement("tr");
+      row.className = "empty-row";
+      const cell = document.createElement("td");
+      cell.colSpan = 5;
+      cell.textContent = message;
+      row.append(cell);
+      elements.alertsList.append(row);
+      return;
+    }
+
+    rows.forEach((alert) => {
+      const row = document.createElement("tr");
+      row.className = "alert-row";
+      const sensorCell = document.createElement("td");
+      const valueCell = document.createElement("td");
+      const thresholdCell = document.createElement("td");
+      const levelCell = document.createElement("td");
+      const timeCell = document.createElement("td");
+      const unit = alert.metrica === "temperatura" ? "°C" : "%";
+
+      sensorCell.textContent = `${alert.device_id} / ${alert.metrica}`;
+      valueCell.textContent = `${alert.valor} ${unit}`;
+      thresholdCell.textContent = `${alert.limiar} ${unit}`;
+      levelCell.textContent = alert.nivel;
+      timeCell.textContent = displayTimestamp(alert.timestamp);
+      row.append(sensorCell, valueCell, thresholdCell, levelCell, timeCell);
+      elements.alertsList.append(row);
+    });
+  }
+
+  async function loadAlerts() {
+    try {
+      const response = await fetch("/api/alertas", { cache: "no-store" });
+      if (!response.ok) throw new Error(`API respondeu com HTTP ${response.status}`);
+      const history = await response.json();
+      if (!Array.isArray(history)) throw new Error("A API retornou alertas em formato inválido");
+
+      history.forEach(handleAlert);
+      renderAlerts();
+    } catch (error) {
+      renderAlerts("Não foi possível carregar os alertas.");
+      console.error("Falha ao carregar o histórico de alertas:", error);
+    }
   }
 
   function appendReading(reading) {
@@ -320,4 +417,5 @@
   window.setInterval(updateServerStatus, 10000);
   connectWebSocket();
   loadHistory();
+  loadAlerts();
 })();
