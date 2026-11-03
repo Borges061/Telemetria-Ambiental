@@ -7,21 +7,23 @@ services:
   #Anderson
   servidor:
     build:
-      context: ./servidor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: servidor/Dockerfile
 
     container_name: monitoramento-servidor
 
     command:
       - uvicorn
-      - main:app
+      - servidor.main:app
       - --host
       - 0.0.0.0
       - --port
       - "8000"
+      - --log-level
+      - debug
 
     environment:
-      DATABASE_PATH: /app/data/monitoramento.db
+      DATABASE_PATH: ${DATABASE_PATH:-/app/data-local/monitoramento.db}
       UDP_HOST: 0.0.0.0
       UDP_PORT: "9999"
       PYTHONUNBUFFERED: "1"
@@ -32,6 +34,7 @@ services:
 
     volumes:
       - sqlite_data:/app/data
+      - ./data:/app/data-local
 
     restart: unless-stopped
 
@@ -41,15 +44,20 @@ services:
   #Pedro
   sensor-ws-01:
     build:
-      context: ./sensores
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: sensores/Dockerfile
 
     command:
       - python
-      - sensor_ws.py
+      - -m
+      - sensores.sensor_temperatura_ws
       - --device-id
-      - sensor-ws-01
-      - --interval
+      - ${DEVICE_ID_SENSOR_WB}
+      - --token
+      - ${TOKEN_WB}
+      - --url
+      - ws://servidor:8000/ws/sensor
+      - --intervalo
       - "2"
 
     environment:
@@ -98,12 +106,21 @@ services:
       context: ./sensores
       dockerfile: Dockerfile
 
+    profiles:
+      - udp
+
     command:
       - python
-      - sensor_udp.py
+      - sensor_umidade_udp.py
       - --device-id
-      - sensor-udp-01
-      - --interval
+      - ${DEVICE_ID_SENSOR_UDP}
+      - --token
+      - ${TOKEN_UDP}
+      - --host
+      - servidor
+      - --porta
+      - "9999"
+      - --intervalo
       - "2"
 
     environment:

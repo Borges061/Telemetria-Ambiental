@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a22">
+    <title>Telemetria Ambiental | Painel</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Telemetria Ambiental - início">
+          <span class="brand-mark" aria-hidden="true">T</span>
+          <span>
+            <strong>telemetria</strong>
+            <small>MONITORAMENTO AMBIENTAL</small>
+          </span>
+        </a>
+        <div class="connection-status" aria-live="polite">
+          <span class="status-dot" id="connection-dot"></span>
+          <span id="connection-label">Conectando...</span>
+        </div>
+      </header>
+
+      <section class="intro">
+        <div>
+          <p class="eyebrow">VISÃO GERAL</p>
+          <h1>Painel de monitoramento</h1>
+          <p class="intro-copy">Acompanhe as condições ambientais recebidas pelos sensores.</p>
+        </div>
+        <div class="updated-at">
+          <span class="eyebrow">ÚLTIMA ATUALIZAÇÃO</span>
+          <strong id="last-updated">Aguardando leituras</strong>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="Resumo do sistema">
+        <article class="summary-card">
+          <div class="card-heading">
+            <span class="card-icon icon-server" aria-hidden="true">⌁</span>
+            <span class="eyebrow">SERVIDOR</span>
+          </div>
+          <strong class="metric-value" id="server-status">Verificando</strong>
+          <span class="card-caption" id="server-uptime">Aguardando resposta da API</span>
+        </article>
+        <article class="summary-card">
+          <div class="card-heading">
+            <span class="card-icon icon-device" aria-hidden="true">◎</span>
+            <span class="eyebrow">SENSORES CONECTADOS</span>
+          </div>
+          <strong class="metric-value" id="active-connections">—</strong>
+          <span class="card-caption">WebSocket ativo ou leitura UDP nos últimos 10 s</span>
+        </article>
+        <article class="summary-card">
+          <div class="card-heading">
+            <span class="card-icon icon-readings" aria-hidden="true">⌗</span>
+            <span class="eyebrow">LEITURAS RECEBIDAS</span>
+          </div>
+          <strong class="metric-value" id="reading-count">0</strong>
+          <span class="card-caption">Desde que este painel foi aberto</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel chart-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">DADOS EM TEMPO REAL</p>
+              <h2>Histórico das leituras</h2>
+            </div>
+            <div class="filters">
+              <label>
+                <span class="sr-only">Métrica do gráfico</span>
+                <select id="metric-filter" aria-label="Filtrar por métrica">
+                  <option value="all">Todas as métricas</option>
+                </select>
+              </label>
+              <label>
+                <span class="sr-only">Dispositivo do gráfico</span>
+                <select id="device-filter" aria-label="Filtrar por dispositivo">
+                  <option value="all">Todos os sensores</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="readings-chart" aria-label="Gráfico das leituras recebidas em tempo real"></canvas>
+            <div class="chart-empty" id="chart-empty">
+              <span class="empty-icon" aria-hidden="true">⌁</span>
+              <strong>Aguardando dados</strong>
+              <span>As novas leituras aparecerão aqui automaticamente.</span>
+            </div>
+          </div>
+          <p class="chart-note">Exibindo até 50 leituras recentes do histórico e atualizações ao vivo.</p>
+        </article>
+
+        <article class="panel latest-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">ATIVIDADE</p>
+              <h2>Leituras recentes</h2>
+            </div>
+            <span class="live-badge"><span></span> AO VIVO</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Sensor / métrica</th>
+                  <th scope="col">Valor</th>
+                  <th scope="col">Horário</th>
+                </tr>
+              </thead>
+              <tbody id="readings-list">
+                <tr class="empty-row">
+                  <td colspan="3">Nenhuma leitura recebida ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel alerts-panel" aria-labelledby="alerts-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">EVENTOS</p>
+            <h2 id="alerts-title">Alertas de temperatura e umidade</h2>
+          </div>
+          <span class="alert-badge" id="alerts-count" aria-live="polite">0 alertas</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Sensor / métrica</th>
+                <th scope="col">Leitura</th>
+                <th scope="col">Limite violado</th>
+                <th scope="col">Nível</th>
+                <th scope="col">Horário</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-list" aria-live="polite">
+              <tr class="empty-row">
+                <td colspan="5">Nenhum alerta de temperatura ou umidade.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>
+        <span>Telemetria Ambiental</span>
+        <span id="api-address">API: —</span>
+      </footer>
+    </main>
+  </body>
+</html>

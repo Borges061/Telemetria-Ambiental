@@ -30,6 +30,8 @@ configuração são feitas por HTTP.
 
 - Coleta de leituras por WebSocket e por UDP, com identificação independente de cada
   dispositivo.
+- O status considera conectados os sensores com WebSocket aberto e os dispositivos UDP com
+  leitura válida e autenticada recebida nos últimos 10 segundos.
 - Atualização do painel em tempo real via WebSocket.
 - Operações de consulta, cadastro e configuração por HTTP/REST.
 - Protocolo de aplicação próprio, documentado em `docs/protocolo.md`.
@@ -96,11 +98,56 @@ Inicie o servidor:
 uvicorn servidor.main:app --host 0.0.0.0 --port 8000
 ```
 
-Inicie um ou mais sensores, em terminais separados:
+Cadastre cada dispositivo pela API para obter seu `device_id` e token:
 
 ```bash
-python sensores/sensor_ws.py --device-id sensor-01
-python sensores/sensor_udp.py --device-id sensor-02
+curl -X POST http://localhost:8000/api/dispositivos \
+  -H 'Content-Type: application/json' \
+  -d '{"nome":"sensor de umidade"}'
+```
+
+Inicie o sensor UDP com as credenciais retornadas:
+
+```bash
+python sensores/sensor_umidade_udp.py \
+  --device-id ID_RETORNADO --token TOKEN_RETORNADO \
+  --host 127.0.0.1 --porta 9999 --intervalo 2
+```
+
+O servidor inicia o listener UDP junto com a API. Para executar o sensor UDP pelo Compose,
+crie um arquivo oculto `.env` na raiz do projeto, ao lado de `compose.yaml`:
+
+```bash
+touch .env
+```
+
+Cadastre um dispositivo para cada sensor que for iniciar e coloque os identificadores e tokens
+retornados pela API nas variáveis correspondentes. O `.env` deve conter estes nomes:
+
+```dotenv
+DEVICE_ID_SENSOR_WB=
+TOKEN_WB=
+DEVICE_ID_SENSOR_UDP=
+TOKEN_UDP=
+DATABASE_PATH=
+```
+
+`DEVICE_ID_SENSOR_WB` e `TOKEN_WB` são usados pelo sensor WebSocket `sensor-ws-01`;
+`DEVICE_ID_SENSOR_UDP` e `TOKEN_UDP`, pelo sensor UDP. `DATABASE_PATH` é opcional e, se
+deixado sem valor ou omitido, o Compose usa o caminho padrão configurado no serviço do servidor.
+O arquivo `.env` está no `.gitignore`; não o adicione ao controle de versão, pois contém
+credenciais.
+
+Com o `.env` preenchido, inicie o sensor WebSocket com:
+
+```bash
+docker compose up --build sensor-ws-01
+```
+
+Para iniciar o sensor UDP, ative também o perfil `udp`:
+
+```bash
+docker compose --profile udp up --build sensor-udp-01
 ```
 
 Abra o painel:
@@ -115,6 +162,19 @@ As instruções detalhadas de cada componente estão nos respectivos diretórios
 
 O formato das mensagens, a sequência de operações, os códigos de erro e exemplos completos
 estão especificados em `docs/protocolo.md`.
+
+## Histórico de leituras pela API
+
+O endpoint `GET /api/leituras` retorna as leituras armazenadas em ordem decrescente de
+inserção. Aceita os parâmetros opcionais `device_id` e `metrica` para filtrar os resultados,
+além de `limite`, que aceita valores de 1 a 500 e usa 50 por padrão. Por exemplo:
+
+```text
+GET /api/leituras?device_id=sensor-01&metrica=temperatura&limite=100
+```
+
+O painel carrega até 50 registros ao abrir e, em seguida, complementa o gráfico com as
+atualizações recebidas pelo WebSocket.
 
 ## Segurança e privacidade
 
