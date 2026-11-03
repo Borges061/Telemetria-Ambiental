@@ -16,8 +16,8 @@ logging.basicConfig(
 )
 
 
-async def executar_sensor(device_id, url, intervalo):
-    sensor = SensorTemperatura(device_id)
+async def executar_sensor(device_id, token, url, intervalo):
+    sensor = SensorTemperatura(device_id, token)
 
     while True:
         try:
@@ -75,6 +75,11 @@ def main():
     )
 
     parser.add_argument(
+        "--token",
+        required=True
+    )
+
+    parser.add_argument(
         "--url",
         default="ws://localhost:8000/ws/sensor"
     )
@@ -94,6 +99,7 @@ def main():
         asyncio.run(
             executar_sensor(
                 args.device_id,
+                args.token,
                 args.url,
                 args.intervalo
             )
