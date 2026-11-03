@@ -58,8 +58,14 @@ Por UDP não há canal de resposta: o erro é apenas registrado no log do servid
 | GET    | `/api/leituras?device=&metrica=&limite=` | histórico (mais recentes primeiro)          |
 | GET    | `/api/alertas`                           | lista de alertas                            |
 | PUT    | `/api/limiares`                          | `{metrica, valor_min, valor_max, nivel}`    |
-| GET    | `/api/status`                            | `{uptime_s, paineis}`                       |
+| GET    | `/api/status`                            | estado do servidor e contagens de sensores ativos |
 | GET    | `/api/ping`                              | `{pong:true, t_servidor}` (Experimento A)   |
+
+Em `/api/status`, `sensores_conectados` soma as conexões WebSocket de sensores às
+identificações de dispositivos UDP que enviaram uma leitura válida e autenticada nos últimos
+10 segundos. `sensores_websocket_conectados` e `sensores_udp_ativos` informam as parcelas
+separadamente. O prazo UDP usa o horário de recebimento no servidor; após esse intervalo sem
+novas leituras, o dispositivo deixa de ser contado como ativo.
 
 ## WebSocket e UDP
 
