@@ -44,12 +44,13 @@ services:
   #Pedro
   sensor-ws-01:
     build:
-      context: ./sensores
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: sensores/Dockerfile
 
     command:
       - python
-      - sensor_temperatura_ws.py
+      - -m
+      - sensores.sensor_temperatura_ws
       - --device-id
       - ${DEVICE_ID_SENSOR_WB}
       - --token
