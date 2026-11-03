@@ -7,7 +7,7 @@ import logging
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed
 
-from sensores.sensor_temperatura import SensorSimulado
+from sensores.sensor_temperatura import SensorTemperatura
 
 
 logging.basicConfig(
@@ -17,7 +17,7 @@ logging.basicConfig(
 
 
 async def executar_sensor(device_id, url, intervalo):
-    sensor = SensorSimulado(device_id)
+    sensor = SensorTemperatura(device_id)
 
     while True:
         try:

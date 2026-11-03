@@ -4,9 +4,10 @@ import time
 from datetime import datetime, timezone
 
 
-class SensorSimulado:
-    def __init__(self, device_id, valor_base=25.0):
+class SensorTemperatura:
+    def __init__(self, device_id, token, valor_base=25.0):
         self.device_id = device_id
+        self.token = token
         self.valor_base = valor_base
         self.seq = 0
 
@@ -25,19 +26,11 @@ class SensorSimulado:
         if random.random() < 0.03:
             temperatura += 12
 
-        '''return {
-            "device_id": self.device_id,
-            "seq": self.seq,
-            "timestamp": datetime.now(
-                timezone.utc
-            ).isoformat(),
-            "temperatura": round(temperatura, 2)
-        }'''
 
         return {
                     "tipo": "leitura",
                     "device_id": self.device_id,
-                    "token": "16221a10743621550b3f7445f5bc471e",
+                    "token": self.token,
                     "timestamp": datetime.now(
                         timezone.utc
                     ).isoformat(),
@@ -49,7 +42,7 @@ class SensorSimulado:
     
 
 #Para Teste
-'''sensor = SensorSimulado("sensor-4ff600df")
+'''sensor = SensorTemperatura("id sensor","token")
 
 while True:
     leitura = sensor.gerar_leitura()
