@@ -112,6 +112,9 @@ async def processar_leitura(
     Retorna um dicionário de erro se a leitura for rejeitada.
     """
 
+    # Horário de chegada no servidor, usado para medir o atraso nos experimentos.
+    recebido_em = datetime.now(timezone.utc)
+
     leitura, erro = validar_leitura(raw)
 
     if erro is not None:
@@ -123,7 +126,7 @@ async def processar_leitura(
             "mensagem": "Dispositivo não autenticado"
         }
 
-    salvar_leitura(
+    leitura_id = salvar_leitura(
         leitura.device_id,
         leitura.metrica,
         leitura.valor,
@@ -135,7 +138,7 @@ async def processar_leitura(
     if via_udp:
         gerenciador.registrar_leitura_udp(leitura.device_id)
 
-    atualizacao = msg_update(leitura)
+    atualizacao = msg_update(leitura, leitura_id, recebido_em)
 
     await gerenciador.transmitir_paineis(atualizacao)
 

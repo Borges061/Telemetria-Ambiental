@@ -167,6 +167,10 @@ services:
     profiles:
       - lab
 
+    # Necessário para o tc netem (Experimento E) dentro do container.
+    cap_add:
+      - NET_ADMIN
+
     working_dir: /app
 
     volumes:

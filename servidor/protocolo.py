@@ -91,15 +91,17 @@ def validar_leitura(raw):
         }
 
 
-def msg_update(leitura):
+def msg_update(leitura, leitura_id, recebido_em):
     """Cria a mensagem de atualização enviada ao painel."""
     return {
         "tipo": "update",
+        "id": leitura_id,
         "device_id": leitura.device_id,
         "metrica": leitura.metrica,
         "valor": leitura.valor,
         "unidade": leitura.unidade,
-        "timestamp": leitura.timestamp.isoformat()
+        "timestamp": leitura.timestamp.isoformat(),
+        "recebido_em": recebido_em.isoformat()
     }
 
 def msg_alerta(leitura, limiar, nivel):

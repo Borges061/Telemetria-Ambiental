@@ -173,7 +173,8 @@
   }
 
   function renderTable() {
-    const rows = readings.slice(0, MAX_TABLE_ROWS);
+    // readings fica em ordem crescente; a tabela mostra as mais recentes primeiro.
+    const rows = readings.slice(-MAX_TABLE_ROWS).reverse();
     elements.readingsList.replaceChildren();
 
     if (rows.length === 0) {
@@ -193,7 +194,9 @@
       const valueCell = document.createElement("td");
       const timeCell = document.createElement("td");
       sensorCell.textContent = `${reading.device_id} / ${reading.metrica}`;
-      valueCell.textContent = `${reading.valor} ${reading.unidade || ""}`.trim();
+      // O protocolo usa "C" para temperatura; na tela exibimos "°C".
+      const unit = reading.unidade === "C" ? "°C" : reading.unidade;
+      valueCell.textContent = `${reading.valor} ${unit || ""}`.trim();
       timeCell.textContent = displayTimestamp(reading.timestamp);
       row.append(sensorCell, valueCell, timeCell);
       elements.readingsList.append(row);

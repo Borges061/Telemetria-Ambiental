@@ -36,7 +36,7 @@ class SensorTemperatura:
                     ).isoformat(),
                     "metrica": "temperatura",
                     "valor": round(temperatura, 2),
-                    "unidade": "ºC",
+                    "unidade": "C",
                     "seq": self.seq
                 }
     

@@ -26,9 +26,14 @@ Valor fora de `[valor_min, valor_max]` gera alerta (`nivel` do limiar, padrão `
 
 ### update (servidor → painel)
 ```json
-{"tipo":"update","device_id":"sensor-01","metrica":"temperatura",
- "valor":23.7,"unidade":"C","timestamp":"2026-10-29T16:00:00-03:00"}
+{"tipo":"update","id":1532,"device_id":"sensor-01","metrica":"temperatura",
+ "valor":23.7,"unidade":"C","timestamp":"2026-10-29T16:00:00-03:00",
+ "recebido_em":"2026-10-29T19:00:00.012345+00:00"}
 ```
+`id` é o identificador da leitura no banco (o mesmo devolvido por `GET /api/leituras`) e
+permite ao painel descartar duplicatas entre o histórico e o fluxo em tempo real.
+`recebido_em` é o horário em que o servidor recebeu a mensagem (UTC); a diferença para
+`timestamp` dá o atraso sensor → servidor usado nos experimentos. Não é gravado no banco.
 
 ### alerta (servidor → painel)
 ```json
