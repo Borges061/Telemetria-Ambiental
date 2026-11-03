@@ -96,11 +96,29 @@ Inicie o servidor:
 uvicorn servidor.main:app --host 0.0.0.0 --port 8000
 ```
 
-Inicie um ou mais sensores, em terminais separados:
+Cadastre cada dispositivo pela API para obter seu `device_id` e token:
 
 ```bash
-python sensores/sensor_ws.py --device-id sensor-01
-python sensores/sensor_udp.py --device-id sensor-02
+curl -X POST http://localhost:8000/api/dispositivos \
+  -H 'Content-Type: application/json' \
+  -d '{"nome":"sensor de umidade"}'
+```
+
+Inicie o sensor UDP com as credenciais retornadas:
+
+```bash
+python sensores/sensor_umidade_udp.py \
+  --device-id ID_RETORNADO --token TOKEN_RETORNADO \
+  --host 127.0.0.1 --porta 9999 --intervalo 2
+```
+
+O servidor inicia o listener UDP junto com a API. Para executar o sensor UDP pelo Compose,
+cadastre o dispositivo primeiro. Edite o serviço `sensor-udp-01` em `compose.yaml` e substitua
+`sensor-udp-01` pelo `device_id` retornado e `SUBSTITUA_PELO_TOKEN_CADASTRADO` pelo token do
+cadastro. Em seguida, ative o perfil:
+
+```bash
+docker compose --profile udp up --build sensor-udp-01
 ```
 
 Abra o painel:
@@ -115,6 +133,19 @@ As instruções detalhadas de cada componente estão nos respectivos diretórios
 
 O formato das mensagens, a sequência de operações, os códigos de erro e exemplos completos
 estão especificados em `docs/protocolo.md`.
+
+## Histórico de leituras pela API
+
+O endpoint `GET /api/leituras` retorna as leituras armazenadas em ordem decrescente de
+inserção. Aceita os parâmetros opcionais `device_id` e `metrica` para filtrar os resultados,
+além de `limite`, que aceita valores de 1 a 500 e usa 50 por padrão. Por exemplo:
+
+```text
+GET /api/leituras?device_id=sensor-01&metrica=temperatura&limite=100
+```
+
+O painel carrega até 50 registros ao abrir e, em seguida, complementa o gráfico com as
+atualizações recebidas pelo WebSocket.
 
 ## Segurança e privacidade
 
