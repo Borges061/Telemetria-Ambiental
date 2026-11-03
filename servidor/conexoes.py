@@ -48,8 +48,8 @@ class GerenciadorConexoes:
             except Exception:
                 self.desconectar_painel(painel)
 
-    def total_conectados(self):
-        return len(self.paineis) + len(self.sensores)
+    def total_sensores_conectados(self):
+        return len(self.sensores)
 
 # Instância compartilhada utilizada pelas rotas do servidor.
 
