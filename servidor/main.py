@@ -13,7 +13,10 @@ from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field, model_validator
 
 from servidor.auth import autenticar_dispositivo, cadastrar_dispositivo
-from servidor.conexoes import gerenciador
+from servidor.conexoes import (
+    JANELA_ATIVIDADE_UDP_SEGUNDOS,
+    gerenciador,
+)
 from servidor.db import (
     get_limiar,
     inicializar_banco,
@@ -99,7 +102,8 @@ def verificar_limiar(metrica, valor):
 
 async def processar_leitura(
     raw: object,
-    origem: str
+    *,
+    via_udp: bool = False
 ) -> dict[str, str] | None:
     """
     Processa uma leitura recebida por WebSocket ou UDP.
@@ -127,6 +131,9 @@ async def processar_leitura(
         leitura.timestamp.isoformat(),
         leitura.seq
     )
+
+    if via_udp:
+        gerenciador.registrar_leitura_udp(leitura.device_id)
 
     atualizacao = msg_update(leitura)
 
@@ -166,7 +173,7 @@ async def processar_leitura_udp(
     dados: object,
     origem: str
 ) -> None:
-    erro = await processar_leitura(dados, origem)
+    erro = await processar_leitura(dados, via_udp=True)
     if erro is not None:
         logging.warning(
             "UDP: leitura rejeitada de %s: %s",
@@ -179,11 +186,15 @@ async def processar_leitura_udp(
 def verificar_status():
     agora = datetime.now(timezone.utc)
     uptime = (agora - inicio_servidor).total_seconds()
+    sensores_websocket, sensores_udp = gerenciador.contagem_sensores()
 
     return {
         "status": "online",
         "uptime_segundos": round(uptime, 2),
-        "sensores_conectados": gerenciador.total_sensores_conectados()
+        "sensores_conectados": sensores_websocket + sensores_udp,
+        "sensores_websocket_conectados": sensores_websocket,
+        "sensores_udp_ativos": sensores_udp,
+        "janela_atividade_udp_segundos": JANELA_ATIVIDADE_UDP_SEGUNDOS
     }
 
 @app.get("/api/ping")
@@ -262,7 +273,7 @@ async def websocket_sensor(websocket: WebSocket):
                 )
                 continue
 
-            erro = await processar_leitura(dados, "websocket")
+            erro = await processar_leitura(dados)
 
             if erro is not None:
                 seq = dados.get("seq") if isinstance(dados, dict) else None
