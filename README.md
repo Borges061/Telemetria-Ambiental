@@ -30,6 +30,8 @@ configuração são feitas por HTTP.
 
 - Coleta de leituras por WebSocket e por UDP, com identificação independente de cada
   dispositivo.
+- O status considera conectados os sensores com WebSocket aberto e os dispositivos UDP com
+  leitura válida e autenticada recebida nos últimos 10 segundos.
 - Atualização do painel em tempo real via WebSocket.
 - Operações de consulta, cadastro e configuração por HTTP/REST.
 - Protocolo de aplicação próprio, documentado em `docs/protocolo.md`.
@@ -113,9 +115,36 @@ python sensores/sensor_umidade_udp.py \
 ```
 
 O servidor inicia o listener UDP junto com a API. Para executar o sensor UDP pelo Compose,
-cadastre o dispositivo primeiro. Edite o serviço `sensor-udp-01` em `compose.yaml` e substitua
-`sensor-udp-01` pelo `device_id` retornado e `SUBSTITUA_PELO_TOKEN_CADASTRADO` pelo token do
-cadastro. Em seguida, ative o perfil:
+crie um arquivo oculto `.env` na raiz do projeto, ao lado de `compose.yaml`:
+
+```bash
+touch .env
+```
+
+Cadastre um dispositivo para cada sensor que for iniciar e coloque os identificadores e tokens
+retornados pela API nas variáveis correspondentes. O `.env` deve conter estes nomes:
+
+```dotenv
+DEVICE_ID_SENSOR_WB=
+TOKEN_WB=
+DEVICE_ID_SENSOR_UDP=
+TOKEN_UDP=
+DATABASE_PATH=
+```
+
+`DEVICE_ID_SENSOR_WB` e `TOKEN_WB` são usados pelo sensor WebSocket `sensor-ws-01`;
+`DEVICE_ID_SENSOR_UDP` e `TOKEN_UDP`, pelo sensor UDP. `DATABASE_PATH` é opcional e, se
+deixado sem valor ou omitido, o Compose usa o caminho padrão configurado no serviço do servidor.
+O arquivo `.env` está no `.gitignore`; não o adicione ao controle de versão, pois contém
+credenciais.
+
+Com o `.env` preenchido, inicie o sensor WebSocket com:
+
+```bash
+docker compose up --build sensor-ws-01
+```
+
+Para iniciar o sensor UDP, ative também o perfil `udp`:
 
 ```bash
 docker compose --profile udp up --build sensor-udp-01
