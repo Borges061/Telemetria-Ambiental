@@ -4,18 +4,29 @@ import logging
 import os
 import socket
 import threading
+from collections.abc import Awaitable, Callable
 
 
-def iniciar_udp(processar_coro, loop: asyncio.AbstractEventLoop) -> threading.Thread:
+def iniciar_udp(
+    processar_coro: Callable[
+        [object, str],
+        Awaitable[dict[str, object] | None]
+    ],
+    loop: asyncio.AbstractEventLoop
+) -> Callable[[], None]:
     """
-    processar_coro: async def processar_leitura(raw: dict, origem: str) do main.py.
-    loop:           event loop do FastAPI, capturado no startup.
-    Retorna a thread já iniciada (daemon=True).
+    Inicia o listener UDP e retorna uma função para encerrá-lo.
     """
     host = os.getenv("UDP_HOST", "0.0.0.0")
     port = int(os.getenv("UDP_PORT", "9999"))
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((host, port))
+    try:
+        sock.bind((host, port))
+        sock.settimeout(0.5)
+    except OSError:
+        sock.close()
+        raise
+    parar = threading.Event()
     logging.info("UDP escutando em %s:%d", host, port)
 
     def _resultado(origem):
@@ -30,19 +41,38 @@ def iniciar_udp(processar_coro, loop: asyncio.AbstractEventLoop) -> threading.Th
         return _cb
 
     def _loop_recv():
-        while True:
-            addr = None
-            try:
-                data, addr = sock.recvfrom(65535)
-                raw = json.loads(data.decode("utf-8"))
+        try:
+            while not parar.is_set():
+                addr = None
+                try:
+                    data, addr = sock.recvfrom(65535)
+                except socket.timeout:
+                    continue
+                except OSError:
+                    if not parar.is_set():
+                        logging.exception("UDP: erro ao receber datagrama")
+                    break
+
                 origem = f"udp:{addr[0]}"
-                fut = asyncio.run_coroutine_threadsafe(processar_coro(raw, origem), loop)
-                fut.add_done_callback(_resultado(origem))
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                logging.warning("UDP: datagrama malformado de %s", addr)
-            except Exception as e:
-                logging.exception("UDP: erro inesperado: %s", e)
+                try:
+                    raw = json.loads(data.decode("utf-8"))
+                    fut = asyncio.run_coroutine_threadsafe(
+                        processar_coro(raw, origem),
+                        loop
+                    )
+                    fut.add_done_callback(_resultado(origem))
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    logging.warning("UDP: datagrama malformado de %s", addr)
+                except Exception:
+                    logging.exception("UDP: erro inesperado ao processar datagrama de %s", addr)
+        finally:
+            sock.close()
 
     t = threading.Thread(target=_loop_recv, name="udp-server", daemon=True)
     t.start()
-    return t
+
+    def encerrar():
+        parar.set()
+        t.join()
+
+    return encerrar
