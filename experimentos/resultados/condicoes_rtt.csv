@@ -1,0 +1,251 @@
+condicao,i,rtt_ms,status,erro,netem
+base,1,0.745,200,,
+base,2,1.181,200,,
+base,3,1.285,200,,
+base,4,1.617,200,,
+base,5,4.505,200,,
+base,6,4.27,200,,
+base,7,4.992,200,,
+base,8,3.593,200,,
+base,9,4.478,200,,
+base,10,3.905,200,,
+base,11,4.577,200,,
+base,12,3.667,200,,
+base,13,3.239,200,,
+base,14,3.285,200,,
+base,15,4.57,200,,
+base,16,5.636,200,,
+base,17,3.96,200,,
+base,18,2.683,200,,
+base,19,3.366,200,,
+base,20,4.169,200,,
+base,21,4.788,200,,
+base,22,4.697,200,,
+base,23,4.693,200,,
+base,24,5.414,200,,
+base,25,4.629,200,,
+base,26,4.617,200,,
+base,27,5.201,200,,
+base,28,6.268,200,,
+base,29,5.26,200,,
+base,30,4.585,200,,
+base,31,5.477,200,,
+base,32,5.505,200,,
+base,33,5.303,200,,
+base,34,4.881,200,,
+base,35,6.016,200,,
+base,36,3.491,200,,
+base,37,5.349,200,,
+base,38,4.323,200,,
+base,39,5.383,200,,
+base,40,7.165,200,,
+base,41,5.825,200,,
+base,42,5.493,200,,
+base,43,4.813,200,,
+base,44,4.61,200,,
+base,45,4.347,200,,
+base,46,4.322,200,,
+base,47,4.636,200,,
+base,48,5.023,200,,
+base,49,3.228,200,,
+base,50,1.093,200,,
+atraso_50ms,1,54.281,200,,delay 50ms
+atraso_50ms,2,56.581,200,,delay 50ms
+atraso_50ms,3,58.631,200,,delay 50ms
+atraso_50ms,4,58.113,200,,delay 50ms
+atraso_50ms,5,58.559,200,,delay 50ms
+atraso_50ms,6,59.206,200,,delay 50ms
+atraso_50ms,7,56.847,200,,delay 50ms
+atraso_50ms,8,57.129,200,,delay 50ms
+atraso_50ms,9,59.729,200,,delay 50ms
+atraso_50ms,10,58.197,200,,delay 50ms
+atraso_50ms,11,58.373,200,,delay 50ms
+atraso_50ms,12,57.746,200,,delay 50ms
+atraso_50ms,13,60.337,200,,delay 50ms
+atraso_50ms,14,56.442,200,,delay 50ms
+atraso_50ms,15,55.421,200,,delay 50ms
+atraso_50ms,16,58.653,200,,delay 50ms
+atraso_50ms,17,55.814,200,,delay 50ms
+atraso_50ms,18,58.177,200,,delay 50ms
+atraso_50ms,19,61.407,200,,delay 50ms
+atraso_50ms,20,60.472,200,,delay 50ms
+atraso_50ms,21,61.029,200,,delay 50ms
+atraso_50ms,22,59.789,200,,delay 50ms
+atraso_50ms,23,57.98,200,,delay 50ms
+atraso_50ms,24,60.655,200,,delay 50ms
+atraso_50ms,25,57.823,200,,delay 50ms
+atraso_50ms,26,56.986,200,,delay 50ms
+atraso_50ms,27,56.091,200,,delay 50ms
+atraso_50ms,28,58.006,200,,delay 50ms
+atraso_50ms,29,60.063,200,,delay 50ms
+atraso_50ms,30,57.951,200,,delay 50ms
+atraso_50ms,31,61.302,200,,delay 50ms
+atraso_50ms,32,56.212,200,,delay 50ms
+atraso_50ms,33,56.347,200,,delay 50ms
+atraso_50ms,34,57.765,200,,delay 50ms
+atraso_50ms,35,57.977,200,,delay 50ms
+atraso_50ms,36,58.675,200,,delay 50ms
+atraso_50ms,37,60.047,200,,delay 50ms
+atraso_50ms,38,59.249,200,,delay 50ms
+atraso_50ms,39,61.912,200,,delay 50ms
+atraso_50ms,40,57.868,200,,delay 50ms
+atraso_50ms,41,60.34,200,,delay 50ms
+atraso_50ms,42,58.276,200,,delay 50ms
+atraso_50ms,43,61.999,200,,delay 50ms
+atraso_50ms,44,56.384,200,,delay 50ms
+atraso_50ms,45,57.136,200,,delay 50ms
+atraso_50ms,46,57.775,200,,delay 50ms
+atraso_50ms,47,62.496,200,,delay 50ms
+atraso_50ms,48,58.173,200,,delay 50ms
+atraso_50ms,49,59.614,200,,delay 50ms
+atraso_50ms,50,55.998,200,,delay 50ms
+atraso_50ms_jitter_10ms,1,49.7,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,2,55.512,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,3,69.833,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,4,37.119,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,5,44.684,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,6,50.717,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,7,65.149,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,8,64.991,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,9,54.198,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,10,65.862,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,11,54.169,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,12,59.426,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,13,43.479,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,14,50.161,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,15,55.729,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,16,61.008,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,17,56.82,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,18,48.591,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,19,64.094,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,20,53.815,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,21,71.277,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,22,62.782,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,23,59.826,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,24,71.546,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,25,62.161,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,26,59.084,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,27,76.607,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,28,63.046,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,29,58.5,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,30,53.066,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,31,59.897,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,32,52.07,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,33,60.542,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,34,57.188,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,35,39.524,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,36,55.479,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,37,67.42,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,38,63.237,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,39,50.556,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,40,52.926,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,41,63.991,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,42,60.364,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,43,55.975,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,44,58.469,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,45,61.485,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,46,50.462,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,47,47.999,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,48,47.296,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,49,73.566,200,,delay 50ms 10ms distribution normal
+atraso_50ms_jitter_10ms,50,62.777,200,,delay 50ms 10ms distribution normal
+perda_5pct,1,1.204,200,,loss 5%
+perda_5pct,2,3.516,200,,loss 5%
+perda_5pct,3,3.967,200,,loss 5%
+perda_5pct,4,4.727,200,,loss 5%
+perda_5pct,5,3.857,200,,loss 5%
+perda_5pct,6,4.392,200,,loss 5%
+perda_5pct,7,3.756,200,,loss 5%
+perda_5pct,8,4.971,200,,loss 5%
+perda_5pct,9,213.712,200,,loss 5%
+perda_5pct,10,4.712,200,,loss 5%
+perda_5pct,11,4.978,200,,loss 5%
+perda_5pct,12,3.554,200,,loss 5%
+perda_5pct,13,4.327,200,,loss 5%
+perda_5pct,14,4.2,200,,loss 5%
+perda_5pct,15,5.051,200,,loss 5%
+perda_5pct,16,4.063,200,,loss 5%
+perda_5pct,17,3.772,200,,loss 5%
+perda_5pct,18,4.682,200,,loss 5%
+perda_5pct,19,4.37,200,,loss 5%
+perda_5pct,20,4.608,200,,loss 5%
+perda_5pct,21,4.597,200,,loss 5%
+perda_5pct,22,4.031,200,,loss 5%
+perda_5pct,23,211.915,200,,loss 5%
+perda_5pct,24,4.956,200,,loss 5%
+perda_5pct,25,5.35,200,,loss 5%
+perda_5pct,26,1.293,200,,loss 5%
+perda_5pct,27,1.481,200,,loss 5%
+perda_5pct,28,4.004,200,,loss 5%
+perda_5pct,29,4.968,200,,loss 5%
+perda_5pct,30,3.589,200,,loss 5%
+perda_5pct,31,2.757,200,,loss 5%
+perda_5pct,32,2.217,200,,loss 5%
+perda_5pct,33,4.253,200,,loss 5%
+perda_5pct,34,210.02,200,,loss 5%
+perda_5pct,35,4.662,200,,loss 5%
+perda_5pct,36,5.247,200,,loss 5%
+perda_5pct,37,4.597,200,,loss 5%
+perda_5pct,38,5.33,200,,loss 5%
+perda_5pct,39,2.839,200,,loss 5%
+perda_5pct,40,3.071,200,,loss 5%
+perda_5pct,41,3.523,200,,loss 5%
+perda_5pct,42,5.468,200,,loss 5%
+perda_5pct,43,4.152,200,,loss 5%
+perda_5pct,44,3.438,200,,loss 5%
+perda_5pct,45,3.358,200,,loss 5%
+perda_5pct,46,3.404,200,,loss 5%
+perda_5pct,47,3.773,200,,loss 5%
+perda_5pct,48,4.215,200,,loss 5%
+perda_5pct,49,4.839,200,,loss 5%
+perda_5pct,50,7.751,200,,loss 5%
+perda_10pct,1,1.684,200,,loss 10%
+perda_10pct,2,5.586,200,,loss 10%
+perda_10pct,3,4.589,200,,loss 10%
+perda_10pct,4,4.922,200,,loss 10%
+perda_10pct,5,4.648,200,,loss 10%
+perda_10pct,6,209.652,200,,loss 10%
+perda_10pct,7,4.691,200,,loss 10%
+perda_10pct,8,210.655,200,,loss 10%
+perda_10pct,9,5.001,200,,loss 10%
+perda_10pct,10,4.872,200,,loss 10%
+perda_10pct,11,4.758,200,,loss 10%
+perda_10pct,12,3.608,200,,loss 10%
+perda_10pct,13,5.319,200,,loss 10%
+perda_10pct,14,3.812,200,,loss 10%
+perda_10pct,15,4.618,200,,loss 10%
+perda_10pct,16,5.318,200,,loss 10%
+perda_10pct,17,4.541,200,,loss 10%
+perda_10pct,18,4.419,200,,loss 10%
+perda_10pct,19,215.479,200,,loss 10%
+perda_10pct,20,3.915,200,,loss 10%
+perda_10pct,21,3.58,200,,loss 10%
+perda_10pct,22,3.903,200,,loss 10%
+perda_10pct,23,4.673,200,,loss 10%
+perda_10pct,24,3.815,200,,loss 10%
+perda_10pct,25,2.277,200,,loss 10%
+perda_10pct,26,0.961,200,,loss 10%
+perda_10pct,27,0.813,200,,loss 10%
+perda_10pct,28,1.095,200,,loss 10%
+perda_10pct,29,2.742,200,,loss 10%
+perda_10pct,30,3.302,200,,loss 10%
+perda_10pct,31,3.836,200,,loss 10%
+perda_10pct,32,3.32,200,,loss 10%
+perda_10pct,33,4.12,200,,loss 10%
+perda_10pct,34,415.779,200,,loss 10%
+perda_10pct,35,5.53,200,,loss 10%
+perda_10pct,36,4.981,200,,loss 10%
+perda_10pct,37,215.942,200,,loss 10%
+perda_10pct,38,4.784,200,,loss 10%
+perda_10pct,39,5.499,200,,loss 10%
+perda_10pct,40,3.783,200,,loss 10%
+perda_10pct,41,4.407,200,,loss 10%
+perda_10pct,42,5.218,200,,loss 10%
+perda_10pct,43,4.329,200,,loss 10%
+perda_10pct,44,4.627,200,,loss 10%
+perda_10pct,45,5.559,200,,loss 10%
+perda_10pct,46,4.975,200,,loss 10%
+perda_10pct,47,4.951,200,,loss 10%
+perda_10pct,48,3.971,200,,loss 10%
+perda_10pct,49,5.536,200,,loss 10%
+perda_10pct,50,4.505,200,,loss 10%

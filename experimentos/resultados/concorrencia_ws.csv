@@ -1,0 +1,4 @@
+clientes,canal,enviadas,entregues,perda_pct,duracao_s,msgs_s,taxa_oferecida_msgs_s,atraso_servidor_media_ms,atraso_servidor_mediana_ms,atraso_painel_media_ms,atraso_painel_mediana_ms,atraso_painel_desvio_ms
+1,ws,100,100,0.0,5.394,18.54,20.0,1.602,1.47,8.922,8.946,2.842
+2,ws,200,200,0.0,5.236,38.2,40.0,3.956,1.466,8.503,7.611,3.403
+5,ws,500,500,0.0,5.215,95.88,100.0,6.593,6.697,8.929,8.776,4.783

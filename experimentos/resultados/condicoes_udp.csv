@@ -1,0 +1,6 @@
+condicao,enviadas,entregues,perda_pct,netem
+base,200,200,0.0,
+atraso_50ms,200,200,0.0,delay 50ms
+atraso_50ms_jitter_10ms,200,200,0.0,delay 50ms 10ms distribution normal
+perda_5pct,200,188,6.0,loss 5%
+perda_10pct,200,180,10.0,loss 10%
